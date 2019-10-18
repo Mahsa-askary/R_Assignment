@@ -3,32 +3,19 @@
 title: "R_Assignment"
 output:
   html_document: default
-  pdf_document: default
+  
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 
-
-## Including Plots
-
-
-##Loading Libraries
+## Loading Libraries
 
 ```{r}
 if (!require("tidyverse")) install.packages("tidyverse")
 library(tidyverse)
 ```
 
-##Loading input files
+## Loading input files
 
 ```{r}
 fang <- read_tsv("https://github.com/EEOB-BioData/BCB546X-Fall2019/raw/master/assignments/UNIX_Assignment/fang_et_al_genotypes.txt")
@@ -36,7 +23,7 @@ View(fang)
 SNP <- read_tsv("https://github.com/EEOB-BioData/BCB546X-Fall2019/raw/master/assignments/UNIX_Assignment/snp_position.txt")
 View(SNP)
 ```
-##Data Inspection
+## Data Inspection
 ```{r}
 head(fang)
 head(SNP)
@@ -68,35 +55,35 @@ print(object.size(fang), units="Mb")
 print(object.size(SNP), units="Mb")
 ```
 
-##Data Processing
+## Data Processing
 
-##Filtering Data
+## Filtering Data
 ```{r}
 maize <- filter(fang, Group == 'ZMMIL' | Group == 'ZMMLR' | Group == 'ZMMMR')
 View(maize)
 teosinte <- filter(fang, Group == 'ZMPBA' | Group == 'ZMPIL' | Group == 'ZMPJA')
 View(teosinte)
 ```
-##Transposing
+## Transposing
 ```{r}
 maize_transposed <- t(maize)
 View(maize_transposed)
 teosinte_transposed <- t(teosinte)
 View(teosinte_transposed)
 ```
-##Selecting Certain Columns in SNP Data
+## Selecting Certain Columns in SNP Data
 ```{r}
 SNP_cut <- SNP %>% select(SNP_ID, Chromosome, Position)
 View(SNP_cut)
 ```
-##Merging Files
+## Merging Files
 ```{r}
 maize_transposed_merged <- merge(SNP_cut, maize_transposed, by.x = 1, by.y = 0 )
 View(maize_transposed_merged)
 teosinte_transposed_merged <- merge(SNP_cut, teosinte_transposed, by.x = 1, by.y = 0)
 View(teosinte_transposed_merged)
 ```
-##Increasing Position
+## Increasing Position
 ```{r}
 maize_incr <- arrange(maize_transposed_merged, as.numeric(Position), is.na(Position))
 View(maize_incr)
@@ -107,9 +94,9 @@ View(maize_decs)
 teosinte_decs <- arrange(teosinte_transposed_merged, desc(as.numeric(Position)), is.na(Position))
 View(teosinte_decs)
 ```
-###It shows a warning but I checked no NAs were introduced, there are six NAs that existed in the original file too.
+### It shows a warning but I checked no NAs were introduced, there are six NAs that existed in the original file too.
 
-##Replacing Characters
+## Replacing Characters
 ```{r}
 maize_incr_replaced <- data.frame(lapply(maize_incr, as.character), stringsAsFactors=FALSE)
 maize_incr_replaced <- data.frame(sapply(maize_incr_replaced,function(x) {x <- sub("?/?","?",x,fixed=TRUE)}))
