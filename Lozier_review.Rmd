@@ -1,0 +1,22 @@
+---
+title: "Lozier_review.Rmd"
+author: "Zach Lozier"
+date: "10/21/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Hello! I enjoyed reading through your code and noticed a couple of things we did differently. One primary difference I noticed is that you sorted your merged and transposed dataframes prior to replacing the missing data characters or separating them by chromosome. I opted to replace the missing data characters, create new dataframes based on group, missing data character, then chromosome, and then sorted each of those before writng them to files. The end result appears to be the same, we just appeared to have taken different routes to get there.
+
+Most of your code worked for me on my computer, but I did have some comments. The below chunk generates a lot of information and creates a lot of text printed straight to the console. I think it may have been better to create a variable to save the output to so that it doesn't print endlessly in the console.
+```{r}
+sapply(fang, class) #maybe this could have been fangClass <- sapply(fang, class)
+sapply(SNP, class)#maybe this could have been snpClass <- sapply(SNP, class)
+```
+
+Another minor issue I encountered is the method you used to write the files for your final output. In your `for` loops, you created the variable `outpath` which contained a file path specific to your own computer. Thus, when I attempted to run that chunk of code, it generated an error since my computer's file system does not contain the path `"/Users/mahsa/Documents/R_Assignment"`. However, I don't notice any issues with the loops and presume they would generate the intended files.
+
+Regarding your plots, your plots include much more color than my own. Your plots are much more pleasing to look at. There were some minor differences between our plots such as inverted axes. Additionally, you were able to plot various attributes by actual sample groups. I was not able to figure out how to do this so good job!

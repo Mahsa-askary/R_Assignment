@@ -43,7 +43,7 @@ ncol(SNP)
 ```
 
 
-```{r}
+```{r include=FALSE}
 sapply(fang, class)
 sapply(SNP, class)
 ```
