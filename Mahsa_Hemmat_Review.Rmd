@@ -1,0 +1,254 @@
+---
+title: "Mahsa_Hemmat_Review"
+author: "Matt Kohane"
+date: "October 20, 2019"
+output: html_document
+---
+---
+title: "R_Assignment"
+output:
+  html_document: default
+---
+
+
+
+##Loading Libraries
+
+```{r}
+library(backports) ##Not a big deal but I needed both of these
+library(vctrs) ##packages before I could work through your assignment.
+##Took me some time to figure this out.
+if (!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+```
+
+##Loading input files
+
+```{r}
+fang <- read_tsv("https://github.com/EEOB-BioData/BCB546X-Fall2019/raw/master/assignments/UNIX_Assignment/fang_et_al_genotypes.txt")
+SNP <- read_tsv("https://github.com/EEOB-BioData/BCB546X-Fall2019/raw/master/assignments/UNIX_Assignment/snp_position.txt")
+```
+##Interesting use of read_tsv, any specific reason?  Works fine just wondering!
+
+
+
+##Data Inspection
+```{r}
+head(fang)
+head(SNP)
+```
+```{r}
+tail(fang)
+tail(SNP)
+```
+```{r}
+dim(fang)
+dim(SNP)
+```
+```{r}
+nrow(fang)
+nrow(SNP)
+```
+```{r}
+ncol(fang)
+ncol(SNP)
+```
+##Good job with using the functions to explain the files, informative data.  
+##In the future it would be helpful for the grader if you could write a bit of documentation for what your code is expected to do, that also helps you understand it on a deeper level as well.
+
+
+
+
+```{r}
+sapply(fang, class)
+sapply(SNP, class)
+```
+```{r}
+print(object.size(fang), units="Mb")
+print(object.size(SNP), units="Mb")
+```
+##I like this, it shows the differences in file sizes. Useful piece of information.
+
+
+##Data Processing
+
+##Filtering Data
+```{r}
+maize <- filter(fang, Group == 'ZMMIL' | Group == 'ZMMLR' | Group == 'ZMMMR')
+teosinte <- filter(fang, Group == 'ZMPBA' | Group == 'ZMPIL' | Group == 'ZMPJA')
+```
+##Good.
+
+
+
+##Transposing
+```{r}
+maize_transposed <- t(maize)
+teosinte_transposed <- t(teosinte)
+```
+
+
+
+##Selecting Certain Columns in SNP Data
+```{r}
+SNP_cut <- SNP %>% select(SNP_ID, Chromosome, Position)
+```
+##Good.
+
+
+##Merging Files
+```{r}
+maize_transposed_merged <- merge(SNP_cut, maize_transposed, by.x = 1, by.y = 0 )
+teosinte_transposed_merged <- merge(SNP_cut, teosinte_transposed, by.x = 1, by.y = 0)
+```
+##Good.
+
+
+##Increasing Position
+```{r}
+maize_incr <- arrange(maize_transposed_merged, as.numeric(Position), is.na(Position))
+teosinte_incr <- arrange(teosinte_transposed_merged, as.numeric(Position), is.na(Position))
+maize_decs <- arrange(maize_transposed_merged, desc(as.numeric(Position)), is.na(Position))
+teosinte_decs <- arrange(teosinte_transposed_merged, desc(as.numeric(Position)), is.na(Position))
+```
+###It shows a warning but I checked no NAs were introduced, there are six NAs that existed in the original file too.
+
+##Good.  Thanks for the heads up.
+
+
+##Replacing Characters
+```{r}
+maize_incr_replaced <- data.frame(lapply(maize_incr, as.character), stringsAsFactors=FALSE)
+maize_incr_replaced <- data.frame(sapply(maize_incr_replaced,function(x) {x <- sub("?/?","?",x,fixed=TRUE)}))
+View(maize_incr_replaced)
+teosinte_incr_replaced <- data.frame(lapply(teosinte_incr, as.character), stringsAsFactors=FALSE)
+teosinte_incr_replaced <- data.frame(sapply(teosinte_incr_replaced,function(x) {x <- sub("?/?","?",x,fixed=TRUE)}))
+teosinte_decr_replaced <- data.frame(lapply(teosinte_decs, as.character), stringsAsFactors=FALSE)
+teosinte_decr_replaced <- data.frame(sapply(teosinte_decr_replaced,function(x) {x <- sub("?/?","-",x,fixed=TRUE)}))
+maize_decr_replaced <- data.frame(lapply(maize_decs, as.character), stringsAsFactors=FALSE)
+maize_decr_replaced <- data.frame(sapply(maize_decr_replaced,function(x) {x <- sub("?/?","-",x,fixed=TRUE)}))
+```
+
+```{r}
+for (i in 1:10) {
+  maize1 <- filter(maize_incr_replaced, Chromosome == i)
+  outpath <- "Users/mjkoh/Desktop/R_Assignments"
+  nam <- sapply(
+    names(maize),function(x){
+                    paste("maize_incr_chr", i, ".tsv", sep='')
+    })
+  out_filePath <- sapply(nam, function(x){
+                     paste(outpath, x, sep='/')})
+  write.table(maize1, file=out_filePath[i])
+}
+for (i in 1:10) {
+  maize2 <- filter(maize_decr_replaced, Chromosome == i)
+  outpath <- "/Users/mahsa/Documents/R_Assignment"
+  nam <- sapply(
+    names(maize),function(x){
+                    paste("maize_decr_chr", i, ".tsv", sep='')
+    })
+  out_filePath <- sapply(nam, function(x){
+                     paste(outpath, x, sep='/')})
+  write.table(maize2, file=out_filePath[i])
+}
+  for (i in 1:10) {
+  teosinte1 <- filter(teosinte_decr_replaced, Chromosome == i)
+  outpath <- "/Users/mahsa/Documents/R_Assignment"
+  nam <- sapply(
+    names(maize),function(x){
+                    paste("teosinte_decr_chr", i, ".tsv", sep='')
+    })
+  out_filePath <- sapply(nam, function(x){
+                     paste(outpath, x, sep='/')})
+  write.table(teosinte1, file=out_filePath[i])
+  }
+  for (i in 1:10) {
+  teosinte2 <- filter(teosinte_incr_replaced, Chromosome == i)
+  outpath <- "/Users/mahsa/Documents/R_Assignment"
+  nam <- sapply(
+    names(maize),function(x){
+                    paste("teosinte_incr_chr", i, ".tsv", sep='')
+    })
+  out_filePath <- sapply(nam, function(x){
+                     paste(outpath, x, sep='/')})
+  write.table(teosinte2, file=out_filePath[i])
+}
+```
+##The above code block did not work for me, I think it has to do with changing the relative path within the designated code chunk, but for me I couldn't get it to work.  Based on the contents of your assignment containing the necessary files, I trust this works.
+
+
+
+
+```{r}
+if (!require("reshape2")) install.packages("reshape2")
+library(reshape2)
+if (!require("ggplot2")) install.packages("ggplot2")
+library(ggplot2)
+```
+##Good.
+
+```{r}
+fang_t <- t(fang)
+whole_merged <- merge(SNP_cut, fang_t, by.x = 1, by.y = 0)
+```
+```{r}
+tidy <- whole_merged %>% pivot_longer( - "SNP_ID", names_to = "SNP_name", values_to = "SNP_Value")
+ggplot(whole_merged) +geom_bar(aes(x=Chromosome, fill=Chromosome)) + 
+  ggtitle("SNPs per Chromosome") + 
+  labs(x="Chromosome",y="SNP Count")
+```
+##Nice, I was able to make the same plot.
+
+
+```{r}
+p <- ggplot(data = whole_merged, mapping = aes(x=Chromosome, y=Position)) + geom_point(size=1)
+p <- p + geom_smooth(method="loess", se=FALSE, span=1/10)
+print(p)
+```
+##I created this plot as well, it has an interesting 
+
+```{r}
+ggplot(fang, aes(Group)) +
+  geom_bar(aes(fill = Group))
+```
+##This plot is informative, I again made one of these. It's nice to know people are making similar plots.
+
+
+
+
+
+```{r}
+fang_tidy <- melt(fang, id = c("Sample_ID", "Group", "JG_OTU"))
+SNP_tidy <- melt(SNP_cut, id = c("SNP_ID", "Chromosome"))
+colnames(fang_tidy)[4:5] <- c("SNP_ID","SNP_Seq")
+whole_tidy <- merge(SNP_tidy, fang_tidy, by.x = 1, by.y = 4)
+whole_tidy$SNP_Type <- whole_tidy$SNP_Seq
+whole_tidy[] <- lapply(whole_tidy, gsub, pattern = "?/?", replacement = "NA", fixed = TRUE)
+whole_tidy$SNP_Type[whole_tidy$SNP_Type == "A/A" | whole_tidy$SNP_Type == "T/T" |
+                       whole_tidy$SNP_Type == "G/G"| whole_tidy$SNP_Type == "C/C"] <- "Ho"
+whole_tidy$SNP_Type[whole_tidy$SNP_Type != "Ho" & whole_tidy$SNP_Type != "NA"] <- "Ht"
+whole <- arrange(whole_tidy, Group, JG_OTU)
+ggplot(whole) + geom_bar(aes(x = Group, fill = SNP_Type), position = "fill") +
+  ggtitle("Heterozygocity by Group") + labs(x = "Group", y = "SNP Types")
+```
+##Nice plot, your code makes sense.  This took me forever because I couldn't figure out the syntax for functions but your code is easily understood so that helps me understand what is happening.  Good work.
+
+
+```{r}
+hetero <- whole_tidy %>% group_by(SNP_ID,SNP_Type) %>% summarize(n=n())
+hetero$Percent <- hetero$n /2782
+ggplot(whole_tidy) + geom_bar(aes(x = SNP_ID, fill = SNP_Type), position = "fill") +
+  ggtitle("Heterozygocity per SNP") + labs(x = "SNP ID", y = "SNP Types")
+```
+##Again, I made a similar plot.  It is a good visualization of the data, in an informative and easy to understand way.  Good work.
+
+```{r}
+whole$Species <- as.character(whole$JG_OTU)
+for (i in 0:9 ) {
+  whole[10] <- lapply(whole[10], gsub, pattern = i , replacement = "", fixed = TRUE)
+}
+ggplot(whole) + geom_bar(aes(x = Species, fill = SNP_Type), position = "fill") +
+  ggtitle("Heterozygocity by Species") + labs(x = "Species", y = "SNP Types")
+```
+##Overall very nice plots and easy to read code, I learned a lot from your assignment!  Very nice work.
